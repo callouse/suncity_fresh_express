@@ -2,10 +2,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/product.dart';
 
 class ProductService {
-  final CollectionReference _productCollection = FirebaseFirestore.instance.collection('products');
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Stream<List<Product>> getProducts() {
-    return _productCollection.snapshots().map((snapshot) =>
-      snapshot.docs.map((doc) => Product.fromFirestore(doc.data() as Map<String, dynamic>)).toList());
+    return _firestore.collection('products').snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return Product.fromFirestore(doc.data());
+      }).toList();
+    });
+  }
+
+  Future<Product> getProductById(String id) async {
+    final doc = await _firestore.collection('products').doc(id).get();
+    return Product.fromFirestore(doc.data()!);
   }
 }

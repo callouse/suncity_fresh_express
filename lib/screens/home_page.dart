@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../services/product_service.dart';
-import '../models/product.dart';
+import '../widgets/product_card.dart';
 
 class HomePage extends StatelessWidget {
   @override
@@ -10,28 +9,21 @@ class HomePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text("Suncity Fresh Express")),
-      body: StreamBuilder<List<Product>>(
+      body: StreamBuilder(
         stream: productService.getProducts(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return CircularProgressIndicator();
-          var products = snapshot.data!;
-          return ListView.builder(
+          if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+
+          final products = snapshot.data as List<Product>;
+          return GridView.builder(
+            padding: EdgeInsets.all(10.0),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 3 / 4,
+            ),
             itemCount: products.length,
             itemBuilder: (context, index) {
-              var product = products[index];
-              return ListTile(
-                title: Text(product.name),
-                subtitle: Text("\$${product.price}"),
-                trailing: IconButton(
-                  icon: Icon(Icons.shopping_cart),
-                  onPressed: () {
-                    // Add to cart logic
-                  },
-                ),
-                onTap: () {
-                  // Navigate to product details or order
-                },
-              );
+              return ProductCard(product: products[index]);
             },
           );
         },

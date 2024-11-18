@@ -1,30 +1,35 @@
 import 'package:http/http.dart' as http;
 
 class ViberService {
-  Future<void> sendOrder(String name, String apartment, List<Map<String, dynamic>> items) async {
-    final message = 'Order from $name, Apartment $apartment:\n' +
-        items.map((item) => '- ${item["name"]} (${item["quantity"]})').join('\n');
+  final String viberApiKey = "YOUR_VIBER_API_KEY"; // Replace with your Viber API Key
+  final String viberAccountId = "YOUR_VIBER_ACCOUNT_ID"; // Replace with your Viber Account ID
+
+  Future<void> sendOrderMessage(String message) async {
+    final url = Uri.parse("https://chatapi.viber.com/pa/send_message");
 
     final response = await http.post(
-      Uri.parse('https://chatapi.viber.com/pa/send_message'),
+      url,
       headers: {
-        'Content-Type': 'application/json',
-        'X-Viber-Auth-Token': 'YOUR_VIBER_API_TOKEN'
+        "Content-Type": "application/json",
+        "X-Viber-Auth-Token": viberApiKey,
       },
-      body: '''{
-        "receiver": "YOUR_VIBER_USER_ID",
-        "min_api_version": 1,
-        "sender": {"name": "Suncity Fresh Express"},
+      body: """
+      {
+        "receiver": "$viberAccountId",
+        "min_api_version": 7,
+        "sender": {
+          "name": "Suncity Fresh Express",
+          "avatar": "https://example.com/avatar.jpg"
+        },
         "tracking_data": "tracking data",
         "type": "text",
         "text": "$message"
-      }''',
+      }
+      """,
     );
 
-    if (response.statusCode == 200) {
-      print("Message sent!");
-    } else {
-      print("Failed to send message: ${response.body}");
+    if (response.statusCode != 200) {
+      throw Exception("Failed to send Viber message: ${response.body}");
     }
   }
 }
